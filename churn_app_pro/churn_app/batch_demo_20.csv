@@ -1,0 +1,21 @@
+CLIENTNUM,Customer_Age,Gender,Dependent_count,Education_Level,Marital_Status,Income_Category,Card_Category,Months_on_book,Total_Relationship_Count,Months_Inactive_12_mon,Contacts_Count_12_mon,Credit_Limit,Total_Revolving_Bal,Total_Amt_Chng_Q4_Q1,Total_Trans_Amt,Total_Trans_Ct,Total_Ct_Chng_Q4_Q1
+100001,52,M,0,High School,Single,Less than $40K,Blue,36,1,6,6,2000,500,0.35,400,8,0.3
+100002,49,F,1,High School,Married,Less than $40K,Blue,34,1,5,5,2500,800,0.45,600,12,0.4
+100003,58,M,0,Uneducated,Divorced,Less than $40K,Blue,40,2,6,7,3000,1200,0.5,700,10,0.35
+100004,45,F,2,Graduate,Married,$40K - $60K,Blue,39,2,4,4,5000,600,0.7,1500,20,0.6
+100005,37,M,1,College,Single,$40K - $60K,Silver,30,2,3,3,7000,1000,0.8,2000,24,0.7
+100006,50,F,2,Graduate,Married,$60K - $80K,Silver,41,3,3,2,9000,1500,0.85,2500,28,0.75
+100007,43,M,3,Graduate,Married,$60K - $80K,Silver,44,3,2,2,11000,2000,0.95,3000,32,0.8
+100008,40,F,2,Graduate,Married,$60K - $80K,Blue,38,3,3,2,8000,2000,1.0,2200,26,0.9
+100009,42,M,1,College,Married,$80K - $120K,Silver,42,4,2,2,12000,1800,1.05,2600,30,0.95
+100010,39,F,0,Graduate,Single,$60K - $80K,Blue,35,2,3,3,6000,1000,0.9,2100,24,0.85
+100011,46,F,2,Graduate,Married,$80K - $120K,Gold,45,4,1,1,15000,1000,1.2,3500,40,1.1
+100012,48,M,2,Graduate,Married,$80K - $120K,Gold,48,5,1,1,16000,800,1.25,3800,44,1.15
+100013,51,F,1,Doctorate,Married,$120K +,Gold,50,5,1,1,20000,500,1.3,4200,48,1.2
+100014,44,M,2,Graduate,Married,$120K +,Platinum,55,6,1,0,30000,600,1.4,5000,60,1.3
+100015,47,F,1,Graduate,Married,$120K +,Platinum,58,6,0,0,40000,800,1.5,5500,70,1.4
+100016,35,M,3,College,Married,$40K - $60K,Blue,25,2,2,2,5000,2500,0.95,1800,22,0.85
+100017,32,F,0,Graduate,Single,$60K - $80K,Blue,28,2,1,1,7000,3500,1.05,1900,24,0.95
+100018,55,M,2,Graduate,Married,$80K - $120K,Silver,46,4,2,1,18000,4000,1.1,3000,36,1.0
+100019,41,F,1,College,Married,$60K - $80K,Silver,37,3,1,1,6000,4200,1.1,3100,40,1.05
+100020,60,M,0,Uneducated,Divorced,Unknown,Blue,33,1,7,7,1500,200,0.3,300,6,0.25
