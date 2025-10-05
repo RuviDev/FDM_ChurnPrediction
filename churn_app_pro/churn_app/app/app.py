@@ -488,48 +488,66 @@ def page_predictor(pipe, expected_cols):
     tab1, tab2 = st.tabs(["📦 Batch Scoring (recommended)", "👤 Single Customer (what‑if)"])
 
     with tab1:
-        # --- ROI controls moved here ---
-        st.info("ROI-driven thresholding")
+        # --- ROI controls ---
+        st.info("Set the financial assumptions for the ROI-driven analysis.")
         c1, c2 = st.columns([1, 1])
         with c1:
-            value = st.number_input("Value per retained (USD)", min_value=0.0, value=200.0, step=10.0, key="bs_value")
+            value = st.number_input("Average Value per Retained Customer ($)", 
+                                    min_value=0.0, value=200.0, step=10.0, key="bs_value",
+                                    help="Estimate the average profit or lifetime value gained from successfully retaining a single customer.")
         with c2:
-            cost = st.number_input("Contact cost (USD)", min_value=0.0, value=2.0, step=1.0, key="bs_cost")
+            cost = st.number_input("Cost per Retention Contact ($)", 
+                                min_value=0.0, value=2.0, step=1.0, key="bs_cost",
+                                help="The average cost of a single retention action (e.g., a phone call, a special offer).")
 
-        # slider on its own row
-        eff = st.slider("Treatment effectiveness (α)", 0.0, 1.0, 0.30, 0.05, key="bs_eff")
+        eff = st.slider("Retention Campaign Effectiveness (α)", 0.0, 1.0, 0.30, 0.05, key="bs_eff",
+                        help="What percentage of customers who are contacted for retention will actually stay? (e.g., 30%)")
 
         st.markdown("---")
 
-        st.write("Upload a CSV. Extra columns are ignored; derived fields are auto-computed.")
-        up = st.file_uploader("Upload CSV", type=["csv"], key="batch")
+        st.write("Upload a CSV of current customers. The model will score them and create a prioritized retention list.")
+        up = st.file_uploader("Upload Customer List (CSV)", type=["csv"], key="batch")
         if up:
             df_in = pd.read_csv(up)
             df_in = apply_derived_fields(df_in)
             proba = score(df_in, pipe, expected_cols)
 
             t_star, ev_star, ts, evs = recommend_threshold(proba, value, cost, eff)
-            st.success(f"Recommended threshold: **{t_star:.2f}**  |  Max Expected Value: **${ev_star:,.0f}**")
-            threshold = st.slider("Decision threshold", 0.1, 0.9, float(t_star), 0.01, key="thr")
-            label = (proba >= threshold).astype(int)
+            st.success(f"Recommended Threshold: **{t_star:.2f}** | Max Expected Value from Campaign: **${ev_star:,.0f}**")
+            
+            threshold = st.slider("Decision Threshold", 0.1, 0.9, float(t_star), 0.01, key="thr",
+                                help="Set the churn probability threshold. Any customer above this will be flagged for retention.")
+            
+            label_numeric = (proba >= threshold).astype(int)
+            label_text = np.where(label_numeric == 1, "Attrited", "Existing")
+            
             enriched = df_in.copy()
             enriched["churn_probability"] = proba
-            enriched["predicted_label"] = label
+            enriched["predicted_label"] = label_text
+            
             reasons_list, actions = [], []
             for i in range(len(enriched)):
                 info = reason_codes(enriched.iloc[i], proba[i])
                 reasons_list.append(" • ".join(info["reasons"]))
                 actions.append(info["action"])
+                
             enriched["top_reasons"] = reasons_list
             enriched["recommended_action"] = actions
-            id_cols = [c for c in enriched.columns if c.lower() in ("clientnum","customer_id","id")]
-            show_cols = id_cols + ["churn_probability","predicted_label","top_reasons","recommended_action"]
+            
+            id_cols = [c for c in enriched.columns if c.lower() in ("clientnum", "customer_id", "id")]
+            show_cols = id_cols + ["churn_probability", "predicted_label", "top_reasons", "recommended_action"]
+            
             st.markdown("#### Ranked Retention Queue")
-            st.dataframe(enriched.sort_values("churn_probability", ascending=False)[show_cols].head(50), use_container_width=True)
-            st.download_button("Download full results CSV", data=enriched.to_csv(index=False).encode("utf-8"),
-                               file_name="retention_queue.csv", mime="text/csv")
+
+            # --- THIS IS THE KEY CHANGE ---
+            # The dataframe is now sorted but NOT filtered, so it shows all customers.
+            retention_full_list = enriched.sort_values("churn_probability", ascending=False)
+            
+            st.dataframe(retention_full_list[show_cols].head(50), use_container_width=True)
+            st.download_button("Download Full Results CSV", data=enriched.to_csv(index=False).encode("utf-8"),
+                            file_name="retention_queue.csv", mime="text/csv")
         else:
-            st.info("Awaiting CSV upload…")
+            st.info("Awaiting customer list upload…")
 
     with tab2:
         st.caption("Enter the customer's details to get a real-time churn prediction.")
