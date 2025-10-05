@@ -1,4 +1,3 @@
-# train_model.py
 """
 Train a calibrated XGBoost churn model (BankChurners).
 - Robust column handling (drops CLIENTNUM + Naive_Bayes_* helper cols)
@@ -104,6 +103,19 @@ def main():
 
     proba = pipe.predict_proba(X_test)[:, 1]
     y_pred = (proba >= 0.5).astype(int)
+
+    # --- Evaluate the final model ---
+    print("\n--- Final Model Evaluation ---")
+    y_pred_proba_final = pipe.predict_proba(X_test)[:, 1]
+    final_auc = roc_auc_score(y_test, y_pred_proba_final)
+
+    y_pred_final = pipe.predict(X_test)
+    final_report = classification_report(y_test, y_pred_final, target_names=['Existing (0)', 'Attrited (1)'], output_dict=True)
+
+    print(f"Final Calibrated XGB F1-Score (Churn): {final_report['Attrited (1)']['f1-score']:.4f}")
+    print(f"Final Calibrated XGB AUC: {final_auc:.4f}")
+
+    # -------------------------------------
 
     print("Classification report (churn class=1):")
     print(classification_report(y_test, y_pred, digits=4))
