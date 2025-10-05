@@ -192,7 +192,6 @@ def sidebar_nav():
     label_map = {k: f"{icon} {label}" for k, label, icon in NAV}
     return label_map[current]
 
-
 # ---------- Pages ----------
 def page_home():
     # Use a visually appealing, centered layout for the main title and value proposition
@@ -257,19 +256,58 @@ def page_home():
         else:
             st.info("model_card.md not found. Create one describing data, preprocessing, model, metrics, intended use, limitations, fairness, and monitoring.")
 
-
-
 def page_eda():
     st.header("Manager's EDA & Churn Insights")
-    st.caption("An automated analysis of customer data to identify the key drivers of churn.")
+    # st.caption("An automated analysis of customer data to identify the key drivers of churn.")
+
+    # --- Layout: button (left) + uploader (right)
+    left, right = st.columns([6, 1])
+
+    with left:
+        # st.header("Manager's EDA & Churn Insights")
+        st.caption("An automated analysis of customer data to identify the key drivers of churn.")
+
+    with right:
+        use_sample_clicked = st.button("Use sample data", help="Load assets/assest/sample_batch.csv")
+        if use_sample_clicked:
+            st.session_state["eda_use_sample"] = True
 
     up = st.file_uploader("Upload BankChurners.csv", type=["csv"], key="eda_csv")
-    if not up:
-        st.info("Please upload the Bank Customers(csv) dataset to begin the analysis.")
-        return
 
-    # --- Load & Clean
-    df = pd.read_csv(up)
+    # --- Decide data source
+    df = None
+    if st.session_state.get("eda_use_sample", False):
+        # Prefer the canonical ASSETS path; fall back to 'assest' if needed
+        sample_paths = [
+            ASSETS / "sample_batch.csv",                  # .../assets/sample_batch.csv
+            APP_DIR / "assest" / "sample_batch.csv"       # .../assest/sample_batch.csv (fallback)
+        ]
+        sample_path = next((p for p in sample_paths if p.exists()), None)
+
+        if sample_path is None:
+            st.error("Sample dataset not found at assets/assest/sample_batch.csv. Please add it or upload a file instead.")
+            st.session_state["eda_use_sample"] = False  # reset and fall back to upload
+        else:
+            try:
+                df = pd.read_csv(sample_path)
+                st.success(f"Loaded sample dataset: {sample_path.name}  •  "
+                           f"{df.shape[0]} rows × {df.shape[1]} columns")
+            except Exception as e:
+                st.error(f"Failed to read sample dataset: {e}")
+                st.session_state["eda_use_sample"] = False
+                df = None
+
+    # If no sample (or sample failed), try the uploaded file
+    if df is None:
+        if not up:
+            st.info("Please upload the Bank Customers CSV to begin, or click **Use sample data**.")
+            return
+        try:
+            df = pd.read_csv(up)
+        except Exception as e:
+            st.error(f"Could not read the uploaded CSV: {e}")
+            return
+        
     nb_cols = [c for c in df.columns if c.startswith("Naive_Bayes_Classifier_")]
     df = df.drop(columns=[c for c in ["CLIENTNUM"]+nb_cols if c in df.columns])
     df["Churn"] = (df["Attrition_Flag"] == "Attrited Customer").astype(int)
@@ -317,7 +355,7 @@ def page_eda():
             fig.update_layout(legend_title_text="Class")
             fig.update_traces(opacity=0.65)
             st.plotly_chart(fig, use_container_width=True)
-            st.caption(f"This chart shows how the values of **{sel_num}** differ between customers "
+            st.caption(f"This chart shows how the values of **{col}** differ between customers "
                        f"who stayed and those who left. Look for clear separations in the distributions.")
             
             st.markdown("---")
@@ -525,22 +563,22 @@ def page_predictor(pipe, expected_cols):
             enriched["churn_probability"] = proba
             enriched["predicted_label"] = label_text
             
-            reasons_list, actions = [], []
+            # --- RECOMMENDED ACTIONS COMMENTED OUT ---
+            reasons_list = [] # actions = [] # Removed actions list
             for i in range(len(enriched)):
                 info = reason_codes(enriched.iloc[i], proba[i])
                 reasons_list.append(" • ".join(info["reasons"]))
-                actions.append(info["action"])
+                # actions.append(info["action"]) # This line is now commented out
                 
             enriched["top_reasons"] = reasons_list
-            enriched["recommended_action"] = actions
+            # enriched["recommended_action"] = actions # This line is now commented out
             
             id_cols = [c for c in enriched.columns if c.lower() in ("clientnum", "customer_id", "id")]
-            show_cols = id_cols + ["churn_probability", "predicted_label", "top_reasons", "recommended_action"]
+            # Updated show_cols to remove 'recommended_action'
+            show_cols = id_cols + ["churn_probability", "predicted_label", "top_reasons"]
             
             st.markdown("#### Ranked Retention Queue")
 
-            # --- THIS IS THE KEY CHANGE ---
-            # The dataframe is now sorted but NOT filtered, so it shows all customers.
             retention_full_list = enriched.sort_values("churn_probability", ascending=False)
             
             st.dataframe(retention_full_list[show_cols].head(50), use_container_width=True)
