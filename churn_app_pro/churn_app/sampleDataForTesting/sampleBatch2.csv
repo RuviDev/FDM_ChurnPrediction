@@ -1,3 +1,0 @@
-Customer_Age,Gender,Dependent_count,Education_Level,Marital_Status,Income_Category,Card_Category,Months_on_book,Total_Relationship_Count,Months_Inactive_12_mon,Contacts_Count_12_mon,Credit_Limit,Total_Revolving_Bal,Avg_Open_To_Buy,Total_Amt_Chng_Q4_Q1,Total_Trans_Amt,Total_Trans_Ct,Total_Ct_Chng_Q4_Q1,Avg_Utilization_Ratio
-52,M,0,High School,Single,Less than $40K,Blue,36,1,6,6,2000,500,1500,0.35,400,8,0.30,0.25
-45,F,2,Graduate,Married,$60K - $80K,Blue,39,5,1,2,12691,777,11914,1.335,1144,42,0.625,0.06
