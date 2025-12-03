@@ -4,7 +4,8 @@ Interactive Streamlit app for **credit-card customer churn prediction and retent
 
 ## 🎥 Demo
 
-▶ [Watch the demo video on YouTube](https://youtu.be/oMLMxdxn1bM)
+[![Watch the demo](churn_app_pro/churn_app/app/assets/demo_thumbnail.jpg)](https://youtu.be/oMLMxdxn1bM)
+
 
 The app lets CRM / product / analytics teams:
 
